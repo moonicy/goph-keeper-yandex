@@ -42,7 +42,7 @@ func (as *AuthService) Login(ctx context.Context, login string, password string)
 	if !as.cryptPass.ComparePasswords(user.Password, password) {
 		return "", errors.New("wrong password")
 	}
-	token, err := as.tokenGenerator.GenerateToken(login)
+	token, err := as.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
 		return "", fmt.Errorf("generating token: %w", err)
 	}
@@ -53,7 +53,7 @@ func (as *AuthService) Logout() error {
 	return nil
 }
 
-func (as *AuthService) Register(ctx context.Context, login string, password string) (uint, error) {
+func (as *AuthService) Register(ctx context.Context, login string, password string) (uint64, error) {
 	cryptPass, err := as.cryptPass.HashPassword(password)
 	if err != nil {
 		return 0, err

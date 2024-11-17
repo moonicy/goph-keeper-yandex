@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	GophKeeper_RegisterUser_FullMethodName = "/proto.GophKeeper/RegisterUser"
 	GophKeeper_LoginUser_FullMethodName    = "/proto.GophKeeper/LoginUser"
+	GophKeeper_AddData_FullMethodName      = "/proto.GophKeeper/AddData"
 )
 
 // GophKeeperClient is the client API for GophKeeper service.
@@ -29,6 +30,7 @@ const (
 type GophKeeperClient interface {
 	RegisterUser(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*RegisterUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
+	AddData(ctx context.Context, in *AddDataRequest, opts ...grpc.CallOption) (*AddDataResponse, error)
 }
 
 type gophKeeperClient struct {
@@ -59,12 +61,23 @@ func (c *gophKeeperClient) LoginUser(ctx context.Context, in *LoginUserRequest, 
 	return out, nil
 }
 
+func (c *gophKeeperClient) AddData(ctx context.Context, in *AddDataRequest, opts ...grpc.CallOption) (*AddDataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddDataResponse)
+	err := c.cc.Invoke(ctx, GophKeeper_AddData_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GophKeeperServer is the server API for GophKeeper service.
 // All implementations must embed UnimplementedGophKeeperServer
 // for forward compatibility.
 type GophKeeperServer interface {
 	RegisterUser(context.Context, *RegisterUserRequest) (*RegisterUserResponse, error)
 	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
+	AddData(context.Context, *AddDataRequest) (*AddDataResponse, error)
 	mustEmbedUnimplementedGophKeeperServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedGophKeeperServer) RegisterUser(context.Context, *RegisterUser
 }
 func (UnimplementedGophKeeperServer) LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
+}
+func (UnimplementedGophKeeperServer) AddData(context.Context, *AddDataRequest) (*AddDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddData not implemented")
 }
 func (UnimplementedGophKeeperServer) mustEmbedUnimplementedGophKeeperServer() {}
 func (UnimplementedGophKeeperServer) testEmbeddedByValue()                    {}
@@ -138,6 +154,24 @@ func _GophKeeper_LoginUser_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GophKeeper_AddData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GophKeeperServer).AddData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GophKeeper_AddData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GophKeeperServer).AddData(ctx, req.(*AddDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GophKeeper_ServiceDesc is the grpc.ServiceDesc for GophKeeper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var GophKeeper_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LoginUser",
 			Handler:    _GophKeeper_LoginUser_Handler,
+		},
+		{
+			MethodName: "AddData",
+			Handler:    _GophKeeper_AddData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

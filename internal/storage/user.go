@@ -4,22 +4,23 @@ import (
 	"context"
 	"errors"
 	"github.com/moonicy/goph-keeper-yandex/internal/entity"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type UserRepository struct {
-	repo *BaseRepository
+	db *gorm.DB
 }
 
-func NewUserRepository(repo *BaseRepository) (*UserRepository, error) {
-	if repo == nil {
-		return nil, errors.New("NewUserRepository: repository is nil")
+func NewUserRepository(db *gorm.DB) (*UserRepository, error) {
+	if db == nil {
+		return nil, errors.New("NewUserRepository: db is nil")
 	}
-	return &UserRepository{repo: repo}, nil
+	return &UserRepository{db: db}, nil
 }
 
-func (ur *UserRepository) Create(ctx context.Context, user entity.User) (uint, error) {
-	db := ur.repo.db.WithContext(ctx).Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user)
+func (ur *UserRepository) Create(ctx context.Context, user entity.User) (uint64, error) {
+	db := ur.db.WithContext(ctx).Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user)
 	if db.Error != nil {
 		return 0, db.Error
 	}
@@ -29,6 +30,6 @@ func (ur *UserRepository) Create(ctx context.Context, user entity.User) (uint, e
 
 func (ur *UserRepository) Get(ctx context.Context, login string) (entity.User, error) {
 	var user entity.User
-	db := ur.repo.db.WithContext(ctx).First(&user, "login = ?", login)
+	db := ur.db.WithContext(ctx).First(&user, "login = ?", login)
 	return user, db.Error
 }
