@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/grpc_handler"
+	"github.com/moonicy/goph-keeper-yandex/internal/interceptor"
 	"github.com/moonicy/goph-keeper-yandex/internal/service"
 	"github.com/moonicy/goph-keeper-yandex/internal/storage"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
@@ -13,18 +14,23 @@ import (
 )
 
 func main() {
-	server := grpc.NewServer()
+	jwtKey := "popa"
 
-	repo, err := storage.NewBaseRepository(config.ServerConfig{Database: "host=localhost port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable"})
+	db, err := storage.NewDB(config.ServerConfig{Database: "host=localhost port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	userRepo, err := storage.NewUserRepository(repo)
+	userRepo, err := storage.NewUserRepository(db)
 	if err != nil {
 		log.Fatal(err)
 	}
+	dataRepo, err := storage.NewDataRepository(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	authInter := interceptor.NewAuthInterceptor(jwtKey)
 	cryptPass := service.NewCryptPass()
-	gen, err := service.NewTokenGenerator("popa")
+	gen, err := service.NewTokenGenerator(jwtKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,10 +38,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer, err := grpc_handler.NewServer(auth)
+	grpcServer, err := grpc_handler.NewServer(auth, dataRepo)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	server := grpc.NewServer(grpc.UnaryInterceptor(authInter.Unary()))
 	pb.RegisterGophKeeperServer(server, grpcServer)
 
 	listener, err := net.Listen("tcp", ":8080")

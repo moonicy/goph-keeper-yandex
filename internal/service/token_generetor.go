@@ -19,10 +19,10 @@ func NewTokenGenerator(jwtKey string) (*TokenGenerator, error) {
 	}, nil
 }
 
-func (tg *TokenGenerator) GenerateToken(login string) (string, error) {
+func (tg *TokenGenerator) GenerateToken(userID uint64) (string, error) {
 	claims := &jwt.MapClaims{
-		"login": login,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"user_id": userID,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(tg.jwtKey)
