@@ -26,3 +26,28 @@ func (dr *DataRepository) AddData(ctx context.Context, data entity.Data) error {
 
 	return db.Error
 }
+
+func (dr *DataRepository) RemoveData(ctx context.Context, id uint64) error {
+	db := dr.db.WithContext(ctx).Delete(&entity.Data{}, id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return db.Error
+}
+
+func (dr *DataRepository) GetData(ctx context.Context, userID uint64) ([]entity.Data, error) {
+	var data []entity.Data
+	db := dr.db.WithContext(ctx).Where("user_id = ?", userID).Find(&data)
+	if db.Error != nil {
+		return []entity.Data{}, db.Error
+	}
+	return data, nil
+}
+
+func (dr *DataRepository) UpdateData(ctx context.Context, data entity.Data) error {
+	db := dr.db.WithContext(ctx).Save(&data)
+	if db.Error != nil {
+		return db.Error
+	}
+	return db.Error
+}

@@ -8,6 +8,9 @@ service GophKeeper {
   rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
   rpc AddData(AddDataRequest) returns (AddDataResponse);
+  rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
+  rpc GetData(GetDataRequest) returns (GetDataResponse);
+  rpc RemoveData(RemoveDataRequest) returns (RemoveDataResponse);
 }
 
 message RegisterUserRequest {
@@ -35,5 +38,34 @@ message AddDataRequest {
 }
 
 message AddDataResponse {
+  string message = 1;
+}
+
+message UpdateDataRequest {
+  uint64 id = 1;
+  bytes data = 2;
+}
+
+message UpdateDataResponse {
+  string message = 1;
+}
+
+message GetDataRequest {
+}
+
+message GetDataResponse {
+  repeated Data data = 1;
+}
+
+message Data {
+  uint64 id = 1;
+  bytes data = 2;
+}
+
+message RemoveDataRequest {
+  uint64 id = 1;
+}
+
+message RemoveDataResponse {
   string message = 1;
 }
