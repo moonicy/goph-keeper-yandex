@@ -3,6 +3,7 @@ package grpc_handler
 import (
 	"context"
 	"errors"
+	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/entity"
 	"github.com/moonicy/goph-keeper-yandex/internal/service"
 	"github.com/moonicy/goph-keeper-yandex/internal/storage"
@@ -14,18 +15,25 @@ type Server struct {
 	pb.UnimplementedGophKeeperServer
 	authService *service.AuthService
 	dataRepo    *storage.DataRepository
+	cryptoKey   string
+	cryptoCrt   string
 }
 
-func NewServer(authService *service.AuthService, dataRepo *storage.DataRepository) (*Server, error) {
+func NewServer(authService *service.AuthService, dataRepo *storage.DataRepository, cfg config.ServerConfig) (*Server, error) {
 	if authService == nil {
 		return nil, errors.New("authService is nil")
 	}
 	if dataRepo == nil {
 		return nil, errors.New("dataRepo is nil")
 	}
+	if cfg.CryptoKey == "" || cfg.CryptoCrt == "" {
+		return nil, errors.New("cryptoKey and cryptoCrt are required")
+	}
 	return &Server{
 		authService: authService,
 		dataRepo:    dataRepo,
+		cryptoKey:   cfg.CryptoKey,
+		cryptoCrt:   cfg.CryptoCrt,
 	}, nil
 }
 

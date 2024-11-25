@@ -1,1 +1,5 @@
 /.idea
+/crypt/**
+!/crypt/.gitkeep
+!/crypt/ca_crt.go
+!/crypt/ca.cnf
