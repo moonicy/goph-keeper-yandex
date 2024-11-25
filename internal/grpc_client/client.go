@@ -2,10 +2,12 @@ package grpc_client
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
+	"github.com/moonicy/goph-keeper-yandex/crypt"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"log"
 )
@@ -22,7 +24,15 @@ type Client struct {
 }
 
 func NewClient(target string) (*Client, error) {
-	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Создаём CertPool и добавляем в него сертификат
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM([]byte(crypt.CaCert)) {
+		log.Fatalf("Не удалось добавить сертификат в CertPool")
+	}
+
+	// Создаём креденшиалы TLS с использованием CertPool
+	creds := credentials.NewClientTLSFromCert(certPool, "localhost")
+	conn, err := grpc.NewClient(target, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, fmt.Errorf("не удалось подключиться: %v", err)
 	}

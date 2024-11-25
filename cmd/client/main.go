@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/grpc_client"
 	"github.com/moonicy/goph-keeper-yandex/internal/subscribtion"
@@ -10,24 +11,18 @@ import (
 	"github.com/rivo/tview"
 )
 
-var (
-	client *grpc_client.Client
-	app    *tview.Application
-	pages  *tview.Pages
-)
-
 func main() {
 	cfg := config.NewClientConfig()
+
 	// Устанавливаем соединение с gRPC сервером
-	cl, err := grpc_client.NewClient(cfg.Host)
+	client, err := grpc_client.NewClient(cfg.Host)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться: %v", err)
 	}
-	client = cl
-	defer cl.Close()
+	defer client.Close()
 
-	app = tview.NewApplication()
-	pages = tview.NewPages()
+	app := tview.NewApplication()
+	pages := tview.NewPages()
 
 	app.SetRoot(pages, true)
 
