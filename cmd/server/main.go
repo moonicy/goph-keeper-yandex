@@ -9,6 +9,7 @@ import (
 	"github.com/moonicy/goph-keeper-yandex/internal/storage"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 )
@@ -38,12 +39,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer, err := grpc_handler.NewServer(auth, dataRepo)
+	grpcServer, err := grpc_handler.NewServer(auth, dataRepo, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := grpc.NewServer(grpc.UnaryInterceptor(authInter.Unary()))
+	creds, err := credentials.NewServerTLSFromFile(cfg.CryptoCrt, cfg.CryptoKey)
+	if err != nil {
+		log.Fatalf("Не удалось загрузить TLS креденшиалы: %v", err)
+	}
+
+	server := grpc.NewServer(grpc.UnaryInterceptor(authInter.Unary()), grpc.Creds(creds))
 	pb.RegisterGophKeeperServer(server, grpcServer)
 
 	listener, err := net.Listen("tcp", cfg.Host+cfg.Port)
