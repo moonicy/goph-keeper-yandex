@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/grpc_client"
 	"github.com/moonicy/goph-keeper-yandex/internal/subscribtion"
 	"github.com/moonicy/goph-keeper-yandex/internal/tui"
@@ -16,8 +17,9 @@ var (
 )
 
 func main() {
+	cfg := config.NewClientConfig()
 	// Устанавливаем соединение с gRPC сервером
-	cl, err := grpc_client.NewClient("localhost:8080")
+	cl, err := grpc_client.NewClient(cfg.Host)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться: %v", err)
 	}
