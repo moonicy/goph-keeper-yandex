@@ -14,9 +14,9 @@ import (
 )
 
 func main() {
-	jwtKey := "popa"
+	cfg := config.NewServerConfig()
 
-	db, err := storage.NewDB(config.ServerConfig{Database: "host=localhost port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable"})
+	db, err := storage.NewDB(cfg.DatabaseDsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,9 +28,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	authInter := interceptor.NewAuthInterceptor(jwtKey)
+	authInter := interceptor.NewAuthInterceptor(cfg.JwtKey)
 	cryptPass := service.NewCryptPass()
-	gen, err := service.NewTokenGenerator(jwtKey)
+	gen, err := service.NewTokenGenerator(cfg.JwtKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,12 +46,12 @@ func main() {
 	server := grpc.NewServer(grpc.UnaryInterceptor(authInter.Unary()))
 	pb.RegisterGophKeeperServer(server, grpcServer)
 
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", cfg.Host+cfg.Port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	fmt.Println("Server is running on port 8080...")
+	fmt.Printf("Server is running on port %s", cfg.Port)
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
