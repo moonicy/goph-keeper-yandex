@@ -37,17 +37,17 @@ func (adf *AddDataForm) Show(dataType string) {
 	addDataForm = tview.NewForm()
 	// В зависимости от типа данных добавляем соответствующие поля
 	switch dataType {
-	case "login_password":
+	case loginPasswordFormType:
 		addDataForm.
 			AddInputField("Логин", "", 50, nil, nil).
 			AddPasswordField("Пароль", "", 50, '*', nil)
-	case "text":
+	case textFormType:
 		addDataForm.
 			AddInputField("Текст", "", 50, nil, nil)
-	case "binary":
+	case binaryFormType:
 		addDataForm.
 			AddInputField("Путь к файлу", "", 50, nil, nil)
-	case "bank_card":
+	case bankCardFormType:
 		addDataForm.
 			AddInputField("Номер карты", "", 20, nil, nil).
 			AddInputField("Срок действия (MM/YY)", "", 5, nil, nil).
@@ -72,17 +72,17 @@ func (adf *AddDataForm) Show(dataType string) {
 
 			// Формируем данные в зависимости от типа
 			switch dataType {
-			case "login_password":
+			case loginPasswordFormType:
 				login := addDataForm.GetFormItemByLabel("Логин").(*tview.InputField).GetText()
 				password := addDataForm.GetFormItemByLabel("Пароль").(*tview.InputField).GetText()
 				dataStruct["data"] = map[string]string{
 					"login":    login,
 					"password": password,
 				}
-			case "text":
+			case textFormType:
 				text := addDataForm.GetFormItemByLabel("Текст").(*tview.InputField).GetText()
 				dataStruct["data"] = text
-			case "binary":
+			case binaryFormType:
 				filePath := addDataForm.GetFormItemByLabel("Путь к файлу").(*tview.InputField).GetText()
 				dataBytes, err = readFileAsBytes(filePath)
 				if err != nil {
@@ -91,7 +91,7 @@ func (adf *AddDataForm) Show(dataType string) {
 				}
 				// Преобразуем бинарные данные в строку Base64 для передачи в JSON
 				dataStruct["data"] = dataBytes
-			case "bank_card":
+			case bankCardFormType:
 				cardNumber := addDataForm.GetFormItemByLabel("Номер карты").(*tview.InputField).GetText()
 				expiryDate := addDataForm.GetFormItemByLabel("Срок действия (MM/YY)").(*tview.InputField).GetText()
 				cvv := addDataForm.GetFormItemByLabel("CVV").(*tview.InputField).GetText()
