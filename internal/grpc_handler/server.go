@@ -39,25 +39,26 @@ func NewServer(authService *service.AuthService, dataRepo *storage.DataRepositor
 
 // RegisterUser обрабатывает регистрацию пользователя
 func (s *Server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserResponse, error) {
-	userID, err := s.authService.Register(ctx, req.Login, req.Password)
+	user, err := s.authService.Register(ctx, req.Login, req.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.RegisterUserResponse{
-		UserId:  userID,
+		UserId:  user.ID,
 		Message: "User registered successfully",
 	}, nil
 }
 
 func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
-	token, err := s.authService.Login(ctx, req.Login, req.Password)
+	token, salt, err := s.authService.Login(ctx, req.Login, req.Password)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.LoginUserResponse{
 		Token:   token,
 		Message: "Success login",
+		Salt:    salt,
 	}, nil
 }
 

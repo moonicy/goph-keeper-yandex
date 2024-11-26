@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/moonicy/goph-keeper-yandex/crypt"
+	"github.com/moonicy/goph-keeper-yandex/internal/service"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -21,9 +22,10 @@ type Client struct {
 	conn   *grpc.ClientConn
 	client pb.GophKeeperClient
 	token  string
+	cpt    *service.Crypt
 }
 
-func NewClient(target string) (*Client, error) {
+func NewClient(target string, cpt *service.Crypt) (*Client, error) {
 	// Создаём CertPool и добавляем в него сертификат
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM([]byte(crypt.CaCert)) {
@@ -40,6 +42,7 @@ func NewClient(target string) (*Client, error) {
 	return &Client{
 		conn:   conn,
 		client: client,
+		cpt:    cpt,
 	}, nil
 }
 
@@ -59,12 +62,14 @@ func (c *Client) Login(login string, password string) error {
 	log.Println(resp.Message)
 
 	c.token = resp.Token
+	c.cpt.Init(password, resp.Salt)
 	return nil
 }
 
 // Logout Очищаем токен
 func (c *Client) Logout() {
 	c.token = ""
+	c.cpt.Clean()
 }
 
 func (c *Client) Register(login string, password string) (uint64, error) {
@@ -81,8 +86,12 @@ func (c *Client) Register(login string, password string) (uint64, error) {
 }
 
 func (c *Client) AddData(data []byte) error {
+	encryptedData, err := c.cpt.Encrypt(data)
+	if err != nil {
+		return fmt.Errorf("ошибка шифрования данных: %v", err)
+	}
 	resp, err := c.client.AddData(c.contextWithToken(), &pb.AddDataRequest{
-		Data: data,
+		Data: encryptedData,
 	})
 	if err != nil {
 		return fmt.Errorf("ошибка добавления данных: %v", err)
@@ -96,13 +105,17 @@ func (c *Client) GetData() ([]Data, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения данных: %v", err)
 	}
-	return c.pbToData(resp.Data), nil
+	return c.pbToData(resp.Data)
 }
 
 func (c *Client) UpdateData(id uint64, data []byte) error {
+	encryptedData, err := c.cpt.Encrypt(data)
+	if err != nil {
+		return fmt.Errorf("ошибка шифрования данных: %v", err)
+	}
 	resp, err := c.client.UpdateData(c.contextWithToken(), &pb.UpdateDataRequest{
 		Id:   id,
-		Data: data,
+		Data: encryptedData,
 	})
 	if err != nil {
 		return fmt.Errorf("ошибка обновления данных: %v", err)
@@ -134,13 +147,17 @@ func (c *Client) contextWithToken() context.Context {
 	return ctx
 }
 
-func (c *Client) pbToData(data []*pb.Data) []Data {
+func (c *Client) pbToData(data []*pb.Data) ([]Data, error) {
 	dt := make([]Data, len(data))
 	for i, d := range data {
+		decryptedData, err := c.cpt.Decrypt(d.Data)
+		if err != nil {
+			return nil, fmt.Errorf("ошибка расшифровки данных с ID %d: %v", d.Id, err)
+		}
 		dt[i] = Data{
 			ID:   d.Id,
-			Data: d.Data,
+			Data: decryptedData,
 		}
 	}
-	return dt
+	return dt, nil
 }
