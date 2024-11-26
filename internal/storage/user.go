@@ -19,13 +19,13 @@ func NewUserRepository(db *gorm.DB) (*UserRepository, error) {
 	return &UserRepository{db: db}, nil
 }
 
-func (ur *UserRepository) Create(ctx context.Context, user entity.User) (uint64, error) {
+func (ur *UserRepository) Create(ctx context.Context, user entity.User) (entity.User, error) {
 	db := ur.db.WithContext(ctx).Clauses(clause.Returning{Columns: []clause.Column{{Name: "id"}}}).Create(&user)
 	if db.Error != nil {
-		return 0, db.Error
+		return entity.User{}, db.Error
 	}
 
-	return user.ID, db.Error
+	return user, db.Error
 }
 
 func (ur *UserRepository) Get(ctx context.Context, login string) (entity.User, error) {

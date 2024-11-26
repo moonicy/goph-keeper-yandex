@@ -58,7 +58,7 @@ func main() {
 	}
 
 	fmt.Printf("Server is running on port %s", cfg.Port)
-	if err := server.Serve(listener); err != nil {
+	if err = server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }
