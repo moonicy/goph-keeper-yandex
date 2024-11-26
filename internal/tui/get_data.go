@@ -49,17 +49,17 @@ func (gd *GetData) Show() {
 
 		var displayData string
 		switch dataType {
-		case "login_password":
+		case loginPasswordFormType:
 			dataMap, _ := dataStruct["data"].(map[string]interface{})
 			login, _ := dataMap["login"].(string)
 			password, _ := dataMap["password"].(string)
 			displayData = fmt.Sprintf("Логин: %s\nПароль: %s", login, password)
-		case "text":
+		case textFormType:
 			text, _ := dataStruct["data"].(string)
 			displayData = fmt.Sprintf("Текст:\n%s", text)
-		case "binary":
+		case binaryFormType:
 			displayData = "Бинарные данные (нельзя отобразить)"
-		case "bank_card":
+		case bankCardFormType:
 			dataMap, _ := dataStruct["data"].(map[string]interface{})
 			number, _ := dataMap["number"].(string)
 			expiry, _ := dataMap["expiry"].(string)

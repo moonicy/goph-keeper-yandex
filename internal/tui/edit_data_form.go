@@ -39,22 +39,22 @@ func (edf *EditDataForm) Show(id uint64, dataStruct map[string]interface{}) {
 
 	// В зависимости от типа данных добавляем соответствующие поля и предзаполняем их текущими значениями
 	switch dataType {
-	case "login_password":
+	case loginPasswordFormType:
 		dataMap, _ := dataStruct["data"].(map[string]interface{})
 		login, _ := dataMap["login"].(string)
 		password, _ := dataMap["password"].(string)
 		editDataForm.
 			AddInputField("Логин", login, 50, nil, nil).
 			AddPasswordField("Пароль", password, 50, '*', nil)
-	case "text":
+	case textFormType:
 		text, _ := dataStruct["data"].(string)
 		editDataForm.
 			AddInputField("Текст", text, 50, nil, nil)
-	case "binary":
+	case binaryFormType:
 		// Бинарные данные нельзя отобразить; предлагаем выбрать новый файл
 		editDataForm.
 			AddInputField("Путь к новому файлу (оставьте пустым, чтобы оставить прежние данные)", "", 50, nil, nil)
-	case "bank_card":
+	case bankCardFormType:
 		dataMap, _ := dataStruct["data"].(map[string]interface{})
 		number, _ := dataMap["number"].(string)
 		expiry, _ := dataMap["expiry"].(string)
@@ -86,17 +86,17 @@ func (edf *EditDataForm) Show(id uint64, dataStruct map[string]interface{}) {
 
 			// Формируем данные в зависимости от типа
 			switch dataType {
-			case "login_password":
+			case loginPasswordFormType:
 				newLogin := editDataForm.GetFormItemByLabel("Логин").(*tview.InputField).GetText()
 				newPassword := editDataForm.GetFormItemByLabel("Пароль").(*tview.InputField).GetText()
 				newDataStruct["data"] = map[string]string{
 					"login":    newLogin,
 					"password": newPassword,
 				}
-			case "text":
+			case textFormType:
 				newText := editDataForm.GetFormItemByLabel("Текст").(*tview.InputField).GetText()
 				newDataStruct["data"] = newText
-			case "binary":
+			case binaryFormType:
 				filePath := editDataForm.GetFormItemByLabel("Путь к новому файлу (оставьте пустым, чтобы оставить прежние данные)").(*tview.InputField).GetText()
 				if filePath != "" {
 					dataBytes, err = readFileAsBytes(filePath)
@@ -109,7 +109,7 @@ func (edf *EditDataForm) Show(id uint64, dataStruct map[string]interface{}) {
 					// Оставляем прежние данные
 					newDataStruct["data"] = dataStruct["data"]
 				}
-			case "bank_card":
+			case bankCardFormType:
 				newNumber := editDataForm.GetFormItemByLabel("Номер карты").(*tview.InputField).GetText()
 				newExpiry := editDataForm.GetFormItemByLabel("Срок действия (MM/YY)").(*tview.InputField).GetText()
 				newCVV := editDataForm.GetFormItemByLabel("CVV").(*tview.InputField).GetText()

@@ -29,16 +29,16 @@ func NewAddDataMenu(sub *subscribtion.Subscription, client *grpc_client.Client, 
 func (adm *AddDataMenu) Show() {
 	menu := tview.NewList().
 		AddItem("Пара логин/пароль", "", '1', func() {
-			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: "login_password"})
+			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: loginPasswordFormType})
 		}).
 		AddItem("Текстовые данные", "", '2', func() {
-			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: "text"})
+			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: textFormType})
 		}).
 		AddItem("Бинарные данные", "", '3', func() {
-			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: "binary"})
+			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: binaryFormType})
 		}).
 		AddItem("Данные банковской карты", "", '4', func() {
-			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: "bank_card"})
+			adm.sub.NotifyEvent(events.ShowAddDataForm, events.AddDataFormEvent{Type: bankCardFormType})
 		}).
 		AddItem("Назад", "", 'b', func() {
 			adm.sub.NotifyEvent(events.ShowMainMenu, nil)
