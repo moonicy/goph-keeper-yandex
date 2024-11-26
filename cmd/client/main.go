@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/grpc_client"
+	"github.com/moonicy/goph-keeper-yandex/internal/service"
 	"github.com/moonicy/goph-keeper-yandex/internal/subscribtion"
 	"github.com/moonicy/goph-keeper-yandex/internal/tui"
 	"log"
@@ -14,8 +15,10 @@ import (
 func main() {
 	cfg := config.NewClientConfig()
 
+	crypt := service.NewCrypt()
+
 	// Устанавливаем соединение с gRPC сервером
-	client, err := grpc_client.NewClient(cfg.Host)
+	client, err := grpc_client.NewClient(cfg.Host, crypt)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться: %v", err)
 	}

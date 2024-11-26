@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/moonicy/goph-keeper-yandex/internal/entity"
 	"github.com/moonicy/goph-keeper-yandex/internal/storage"
 )
@@ -28,38 +29,35 @@ func NewAuthService(userRepository *storage.UserRepository, cryptPass *CryptPass
 	}, nil
 }
 
-func (as *AuthService) Login(ctx context.Context, login string, password string) (string, error) {
+func (as *AuthService) Login(ctx context.Context, login string, password string) (string, string, error) {
 	if login == "" {
-		return "", errors.New("login is empty")
+		return "", "", errors.New("login is empty")
 	}
 	if password == "" {
-		return "", errors.New("password is empty")
+		return "", "", errors.New("password is empty")
 	}
 	user, err := as.userRepository.Get(ctx, login)
 	if err != nil {
-		return "", fmt.Errorf("user %s is not exist", login)
+		return "", "", fmt.Errorf("user %s is not exist", login)
 	}
 	if !as.cryptPass.ComparePasswords(user.Password, password) {
-		return "", errors.New("wrong password")
+		return "", "", errors.New("wrong password")
 	}
 	token, err := as.tokenGenerator.GenerateToken(user.ID)
 	if err != nil {
-		return "", fmt.Errorf("generating token: %w", err)
+		return "", "", fmt.Errorf("generating token: %w", err)
 	}
-	return token, nil
+	return token, user.Salt, nil
 }
 
-func (as *AuthService) Logout() error {
-	return nil
-}
-
-func (as *AuthService) Register(ctx context.Context, login string, password string) (uint64, error) {
+func (as *AuthService) Register(ctx context.Context, login string, password string) (entity.User, error) {
 	cryptPass, err := as.cryptPass.HashPassword(password)
 	if err != nil {
-		return 0, err
+		return entity.User{}, err
 	}
 	return as.userRepository.Create(ctx, entity.User{
 		Login:    login,
 		Password: cryptPass,
+		Salt:     uuid.New().String(),
 	})
 }

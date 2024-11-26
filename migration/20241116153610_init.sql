@@ -3,7 +3,8 @@
 CREATE TABLE users(
     id serial PRIMARY KEY,
     login varchar(255) not null UNIQUE,
-    password varchar(512) not null
+    password varchar(512) not null,
+    salt varchar(255) not null
 );
 CREATE TABLE data(
     id serial PRIMARY KEY,
