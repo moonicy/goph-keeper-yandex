@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/moonicy/goph-keeper-yandex/crypt"
-	"github.com/moonicy/goph-keeper-yandex/internal/service"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -19,13 +18,13 @@ type Data struct {
 }
 
 type Client struct {
-	conn   *grpc.ClientConn
-	client pb.GophKeeperClient
+	conn   ClientConn
+	client GophKeeperClient
 	token  string
-	cpt    *service.Crypt
+	cpt    Crypt
 }
 
-func NewClient(target string, cpt *service.Crypt) (*Client, error) {
+func NewClient(target string, cpt Crypt) (*Client, error) {
 	// Создаём CertPool и добавляем в него сертификат
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM([]byte(crypt.CaCert)) {
