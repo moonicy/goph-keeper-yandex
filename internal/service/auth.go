@@ -6,16 +6,15 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/moonicy/goph-keeper-yandex/internal/entity"
-	"github.com/moonicy/goph-keeper-yandex/internal/storage"
 )
 
 type AuthService struct {
-	userRepository *storage.UserRepository
-	cryptPass      *CryptPass
-	tokenGenerator *TokenGenerator
+	userRepository UserRepository
+	cryptPass      ICryptPass
+	tokenGenerator ITokenGenerator
 }
 
-func NewAuthService(userRepository *storage.UserRepository, cryptPass *CryptPass, tokenGenerator *TokenGenerator) (*AuthService, error) {
+func NewAuthService(userRepository UserRepository, cryptPass ICryptPass, tokenGenerator ITokenGenerator) (*AuthService, error) {
 	if userRepository == nil {
 		return nil, errors.New("userRepository is nil")
 	}

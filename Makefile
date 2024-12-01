@@ -27,3 +27,14 @@ keys-generate:
 	openssl req -new -key ./crypt/server.key -out ./crypt/server.csr -batch -config ./crypt/ca.cnf
 	# Подписываем CSR сервера, создавая сертификат сервера
 	openssl x509 -req -in ./crypt/server.csr -CA ./crypt/ca.crt -CAkey ./crypt/ca.key -CAcreateserial -out ./crypt/server.crt -days 3650 -sha256 -extensions req_ext -extfile ./crypt/ca.cnf
+
+.PHONY: mocks-generate
+mocks-generate:
+	go generate ./...
+
+.PHONY: test
+test:
+	@echo "Running tests with coverage..."
+	@go test -coverprofile cover.out.tmp ./...
+	@cat cover.out.tmp | grep -v '^github.com/moonicy/goph-keeper-yandex/cmd' | grep -v '^github.com/moonicy/goph-keeper-yandex/proto' | grep -v '^github.com/moonicy/goph-keeper-yandex/mocks' > cover.out
+	@go tool cover -func=cover.out

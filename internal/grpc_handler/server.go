@@ -5,21 +5,19 @@ import (
 	"errors"
 	"github.com/moonicy/goph-keeper-yandex/internal/config"
 	"github.com/moonicy/goph-keeper-yandex/internal/entity"
-	"github.com/moonicy/goph-keeper-yandex/internal/service"
-	"github.com/moonicy/goph-keeper-yandex/internal/storage"
 	pb "github.com/moonicy/goph-keeper-yandex/proto"
 )
 
 // Server реализует интерфейс, сгенерированный из proto файла
 type Server struct {
 	pb.UnimplementedGophKeeperServer
-	authService *service.AuthService
-	dataRepo    *storage.DataRepository
+	authService AuthService
+	dataRepo    DataRepository
 	cryptoKey   string
 	cryptoCrt   string
 }
 
-func NewServer(authService *service.AuthService, dataRepo *storage.DataRepository, cfg config.ServerConfig) (*Server, error) {
+func NewServer(authService AuthService, dataRepo DataRepository, cfg config.ServerConfig) (*Server, error) {
 	if authService == nil {
 		return nil, errors.New("authService is nil")
 	}
