@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto";
+
+service GophKeeper {
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+  rpc AddData(AddDataRequest) returns (AddDataResponse);
+  rpc UpdateData(UpdateDataRequest) returns (UpdateDataResponse);
+  rpc GetData(GetDataRequest) returns (GetDataResponse);
+  rpc RemoveData(RemoveDataRequest) returns (RemoveDataResponse);
+}
+
+message RegisterUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message RegisterUserResponse {
+  uint64 user_id = 1;
+  string message = 2;
+}
+
+message LoginUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message LoginUserResponse {
+  string token = 1;
+  string message = 2;
+  string salt = 3;
+}
+
+message AddDataRequest {
+  bytes data = 1;
+}
+
+message AddDataResponse {
+  string message = 1;
+}
+
+message UpdateDataRequest {
+  uint64 id = 1;
+  bytes data = 2;
+}
+
+message UpdateDataResponse {
+  string message = 1;
+}
+
+message GetDataRequest {
+}
+
+message GetDataResponse {
+  repeated Data data = 1;
+}
+
+message Data {
+  uint64 id = 1;
+  bytes data = 2;
+}
+
+message RemoveDataRequest {
+  uint64 id = 1;
+}
+
+message RemoveDataResponse {
+  string message = 1;
+}
