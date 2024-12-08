@@ -38,3 +38,12 @@ test:
 	@go test -coverprofile cover.out.tmp ./...
 	@cat cover.out.tmp | grep -v '^github.com/moonicy/goph-keeper-yandex/cmd' | grep -v '^github.com/moonicy/goph-keeper-yandex/proto' | grep -v '^github.com/moonicy/goph-keeper-yandex/mocks' > cover.out
 	@go tool cover -func=cover.out
+
+.PHONY: up-db
+up-db:
+	docker run --name my-postgres \
+	  -e POSTGRES_USER=mila \
+	  -e POSTGRES_PASSWORD=qwerty \
+	  -e POSTGRES_DB=goph_keeper \
+	  -p 5432:5432 \
+	  -d postgres:latest
