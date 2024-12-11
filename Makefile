@@ -1,8 +1,8 @@
 export
 
-GOOSE_DRIVER=postgres
-GOOSE_DBSTRING=host=localhost port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable
-GOOSE_MIGRATION_DIR=./migration
+GOOSE_DRIVER?=postgres
+GOOSE_DBSTRING?=host=localhost port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable
+GOOSE_MIGRATION_DIR?=./migration
 
 .PHONY: migrate
 migrate:
@@ -47,3 +47,15 @@ up-db:
 	  -e POSTGRES_DB=goph_keeper \
 	  -p 5432:5432 \
 	  -d postgres:latest
+
+.PHONY: up-server
+up-server:
+	@docker compose up -d
+
+.PHONY: down-server
+down-server:
+	@docker compose down
+
+.PHONY: connect
+connect:
+	docker compose exec goph-keeper-server go run cmd/client/main.go
