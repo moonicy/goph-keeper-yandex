@@ -1,0 +1,34 @@
+services:
+  goph-keeper-db:
+    image: postgres:latest
+    container_name: goph-keeper-db
+    environment:
+      POSTGRES_USER: mila
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: goph_keeper
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "mila", "-d", "goph_keeper"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  goph-keeper-server:
+    image: golang:latest
+    container_name: goph-keeper-server
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: /bin/sh -c "go mod download && make keys-generate && make migrate && go run cmd/server/main.go"
+    environment:
+      GOOSE_DBSTRING: "host=goph-keeper-db port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable"
+      DATABASE_DSN: "host=goph-keeper-db port=5432 user=mila dbname=goph_keeper password=qwerty sslmode=disable"
+    depends_on:
+      goph-keeper-db:
+        condition: service_healthy
+
+volumes:
+  db_data:
